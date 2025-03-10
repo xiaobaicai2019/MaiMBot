@@ -8,7 +8,7 @@ from nonebot.typing import T_State
 
 from ...common.database import Database
 from ..moods.moods import MoodManager  # 导入情绪管理器
-from ..schedule.schedule_generator import bot_schedule
+# from ..schedule.schedule_generator import bot_schedule
 from ..utils.statistic import LLMStatistics
 from .bot import chat_bot
 from .config import global_config

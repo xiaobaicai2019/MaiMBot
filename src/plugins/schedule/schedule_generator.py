@@ -49,7 +49,7 @@ class ScheduleGenerator:
 
     async def generate_daily_schedule(self, target_date: datetime.datetime = None, read_only: bool = False) -> Dict[
         str, str]:
-
+        return  '忘了', None
         date_str = target_date.strftime("%Y-%m-%d")
         weekday = target_date.strftime("%A")
 
