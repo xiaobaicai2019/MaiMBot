@@ -156,7 +156,7 @@ class PromptBuilder:
         #    prompt_ger += '你喜欢用文言文'
 
         # 额外信息要求
-        extra_info = '''尤其注意在没明确提到时不要过多提及自身的背景, 不要直接回复别人发的表情包，记住不要输出多余内容(包括前后缀，冒号和引号，括号，表情等)，只需要输出回复内容就好，不要输出其他任何内容'''
+        extra_info = '''尤其注意在没明确提到时不要过多提及自身的背景, 回答平淡一点，不要直接回复别人发的表情包，记住不要输出多余内容(包括前后缀，冒号和引号，括号，表情等)，只需要输出回复内容就好，不要输出其他任何内容'''
 
         # 合并prompt
         prompt = ""
@@ -185,9 +185,9 @@ class PromptBuilder:
     def _build_initiative_prompt_select(self, group_id, probability_1=0.8, probability_2=0.1):
         current_date = time.strftime("%Y-%m-%d", time.localtime())
         current_time = time.strftime("%H:%M:%S", time.localtime())
-        bot_schedule_now_time, bot_schedule_now_activity = bot_schedule.get_current_task()
-        prompt_date = f'''今天是{current_date}，现在是{current_time}，你今天的日程是：\n{bot_schedule.today_schedule}\n你现在正在{bot_schedule_now_activity}\n'''
-
+        #bot_schedule_now_time, bot_schedule_now_activity = bot_schedule.get_current_task()
+        prompt_date = f'''今天是{current_date}，现在是{current_time}\n'''
+#，你今天的日程是：\n{bot_schedule.today_schedule}\n你现在正在{bot_schedule_now_activity}
         chat_talking_prompt = ''
         if group_id:
             chat_talking_prompt = get_recent_group_detailed_plain_text(self.db, group_id,

@@ -201,7 +201,7 @@ class CQCode:
     async def get_image_description(self, image_base64: str) -> str:
         """调用AI接口获取普通图片描述"""
         try:
-            prompt = "请用中文描述这张图片的内容。如果有文字，请把文字都描述出来。并尝试猜测这个图片的含义。最多200个字，可以使用二次元词汇如：猫娘、萝莉。"
+            prompt = "请用中文描述这张图片的内容。如果有文字，请把文字都描述出来。并尝试猜测这个图片的含义。最多200个字，可以使用二次元词汇。"
             # description, _ = self._llm.generate_response_for_image_sync(prompt, image_base64)
             description, _ = await self._llm.generate_response_for_image(prompt, image_base64)
             return f"[图片：{description}]"
