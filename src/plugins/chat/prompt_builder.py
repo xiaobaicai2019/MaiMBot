@@ -6,7 +6,7 @@ from loguru import logger
 from ...common.database import Database
 from ..memory_system.memory import hippocampus, memory_graph
 from ..moods.moods import MoodManager
-from ..schedule.schedule_generator import bot_schedule
+#from ..schedule.schedule_generator import bot_schedule
 from .config import global_config
 from .utils import get_embedding, get_recent_group_detailed_plain_text
 from .chat_stream import chat_manager
@@ -54,10 +54,10 @@ class PromptBuilder:
         mood_prompt = mood_manager.get_prompt()
 
         # 日程构建
-        current_date = time.strftime("%Y-%m-%d", time.localtime())
-        current_time = time.strftime("%H:%M:%S", time.localtime())
-        bot_schedule_now_time, bot_schedule_now_activity = bot_schedule.get_current_task()
-        prompt_date = f'''今天是{current_date}，现在是{current_time}，你今天的日程是：\n{bot_schedule.today_schedule}\n你现在正在{bot_schedule_now_activity}\n'''
+        # current_date = time.strftime("%Y-%m-%d", time.localtime())
+        # current_time = time.strftime("%H:%M:%S", time.localtime())
+        # bot_schedule_now_time, bot_schedule_now_activity = bot_schedule.get_current_task()
+        # prompt_date = f'''今天是{current_date}，现在是{current_time}，你今天的日程是：\n{bot_schedule.today_schedule}\n你现在正在{bot_schedule_now_activity}\n'''
 
         # 知识构建
         start_time = time.time()
@@ -143,17 +143,19 @@ class PromptBuilder:
         else:
             prompt_in_group=f"你正在{chat_stream.platform}上和{sender_name}私聊"
         if personality_choice < probability_1:  # 第一种人格
+
             prompt_personality += f'''{personality[0]}, 你正在浏览qq群,{promt_info_prompt},
-            现在请你给出日常且口语化的回复，平淡一些，尽量简短一些。{keywords_reaction_prompt}
-            请注意把握群里的聊天内容，不要刻意突出自身学科背景，不要回复的太有条理，可以有个性。'''
+            现在请你给出日常且口语化的回复。{keywords_reaction_prompt}
+            请注意把握群里的聊天内容，回复可以有个性。'''
         elif personality_choice < probability_1 + probability_2:  # 第二种人格
             prompt_personality += f'''{personality[1]}, 你正在浏览qq群，{promt_info_prompt},
-            现在请你给出日常且口语化的回复，请表现你自己的见解，不要一昧迎合，尽量简短一些。{keywords_reaction_prompt}
-            请你表达自己的见解和观点。可以有个性。'''
+            现在请你给出日常且口语化的回复。{keywords_reaction_prompt}
+            请注意把握群里的聊天内容，回复可以有个性。'''
         else:  # 第三种人格
             prompt_personality += f'''{personality[2]}, 你正在浏览qq群，{promt_info_prompt},
-            现在请你给出日常且口语化的回复，请表现你自己的见解，不要一昧迎合，尽量简短一些。{keywords_reaction_prompt}
-            请你表达自己的见解和观点。可以有个性。'''
+            现在请你给出日常且口语化的回复。{keywords_reaction_prompt}
+            请注意把握群里的聊天内容，回复可以有个性。'''
+
 
         # 中文高手(新加的好玩功能)
         prompt_ger = ''
@@ -161,16 +163,16 @@ class PromptBuilder:
             prompt_ger += '你喜欢用倒装句'
         if random.random() < 0.02:
             prompt_ger += '你喜欢用反问句'
-        if random.random() < 0.01:
-            prompt_ger += '你喜欢用文言文'
+        #if random.random() < 0.01:
+        #    prompt_ger += '你喜欢用文言文'
 
         # 额外信息要求
-        extra_info = '''但是记得回复平淡一些，简短一些，尤其注意在没明确提到时不要过多提及自身的背景, 不要直接回复别人发的表情包，记住不要输出多余内容(包括前后缀，冒号和引号，括号，表情等)，只需要输出回复内容就好，不要输出其他任何内容'''
+        extra_info = '''尤其注意在没明确提到时不要过多提及自身的背景, 回答平淡一点，不要直接回复别人发的表情包，记住不要输出多余内容(包括前后缀，冒号和引号，括号，表情等)，只需要输出回复内容就好，不要输出其他任何内容'''
 
         # 合并prompt
         prompt = ""
         prompt += f"{prompt_info}\n"
-        prompt += f"{prompt_date}\n"
+        #prompt += f"{prompt_date}\n"
         prompt += f"{chat_talking_prompt}\n"
         prompt += f"{prompt_personality}\n"
         prompt += f"{prompt_ger}\n"
@@ -187,16 +189,16 @@ class PromptBuilder:
         else:  # 第三种人格
             prompt_personality_check = f'''你的网名叫{global_config.BOT_NICKNAME}，{personality[2]}, 你正在浏览qq群，{promt_info_prompt} {activate_prompt_check} {extra_check_info}'''
 
-        prompt_check_if_response = f"{prompt_info}\n{prompt_date}\n{chat_talking_prompt}\n{prompt_personality_check}"
-
+        prompt_check_if_response = f"{prompt_info}\n{chat_talking_prompt}\n{prompt_personality_check}"
+#{prompt_date}\n
         return prompt, prompt_check_if_response
 
     def _build_initiative_prompt_select(self, group_id, probability_1=0.8, probability_2=0.1):
         current_date = time.strftime("%Y-%m-%d", time.localtime())
         current_time = time.strftime("%H:%M:%S", time.localtime())
-        bot_schedule_now_time, bot_schedule_now_activity = bot_schedule.get_current_task()
-        prompt_date = f'''今天是{current_date}，现在是{current_time}，你今天的日程是：\n{bot_schedule.today_schedule}\n你现在正在{bot_schedule_now_activity}\n'''
-
+        #bot_schedule_now_time, bot_schedule_now_activity = bot_schedule.get_current_task()
+        prompt_date = f'''今天是{current_date}，现在是{current_time}\n'''
+#，你今天的日程是：\n{bot_schedule.today_schedule}\n你现在正在{bot_schedule_now_activity}
         chat_talking_prompt = ''
         if group_id:
             chat_talking_prompt = get_recent_group_detailed_plain_text(self.db, group_id,

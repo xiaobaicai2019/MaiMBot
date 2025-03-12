@@ -177,7 +177,6 @@ class EmojiManager:
             logger.error(f"获取表情包失败: {str(e)}")
             return None
 
-
     async def _get_emoji_discription(self, image_base64: str) -> str:
         """获取表情包的标签，使用image_manager的描述生成功能"""
 

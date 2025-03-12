@@ -1,6 +1,9 @@
 import re
 import time
 from random import random
+
+import asyncio
+
 from loguru import logger
 from nonebot.adapters.onebot.v11 import (
     Bot,
@@ -149,9 +152,16 @@ class ChatBot:
         logger.debug(f"对{message.processed_plain_text}的激活度:{interested_rate}")
         # logger.info(f"\033[1;32m[主题识别]\033[0m 使用{global_config.topic_extract}主题: {topic}")
 
+
         await self.storage.store_message(message, chat, topic[0] if topic else None)
 
         is_mentioned = is_mentioned_bot_in_message(message)
+    
+        if is_mentioned:
+            #如果被@等待下文10秒
+            await asyncio.sleep(10)
+            logger.info(f"被@，等待下文")
+            
         reply_probability = await willing_manager.change_reply_willing_received(
             chat_stream=chat,
             topic=topic[0] if topic else None,
@@ -159,6 +169,8 @@ class ChatBot:
             config=global_config,
             is_emoji=message.is_emoji,
             interested_rate=interested_rate,
+
+
         )
         current_willing = willing_manager.get_willing(chat_stream=chat)
 
