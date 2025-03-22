@@ -97,8 +97,8 @@ class ScheduleGenerator:
             matched = re.search(reg, schedule_text)[0]
             schedule_dict = json.loads(matched)
             return schedule_dict
-        except json.JSONDecodeError:
-            logger.exception("解析日程失败: {}".format(schedule_text))
+        except (json.JSONDecodeError,TypeError):
+            # logger.exception("解析日程失败: {}".format(schedule_text))
             return False
 
     def _parse_time(self, time_str: str) -> str:
