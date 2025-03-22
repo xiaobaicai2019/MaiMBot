@@ -37,7 +37,6 @@ class ImageManager:
             self._ensure_image_dir()
             self._initialized = True
             self._llm = LLM_request(model=global_config.vlm, temperature=0.4, max_tokens=1000, request_type="image")
-            self._minor_llm = LLM_request(model="Pro/Qwen/Qwen2.5-VL-7B-Instruct", temperature=0.4, max_tokens=1000, request_type="image")
 
     def _ensure_image_dir(self):
         """确保图像存储目录存在"""
@@ -118,7 +117,7 @@ class ImageManager:
 
             # 调用AI获取描述
             prompt = "这是一个表情包，使用中文简洁的描述一下表情包的内容，表情包上的文字和表情包所表达的情感，可以使用二次元词汇"
-            description, _ = await self._minor_llm.generate_response_for_image(prompt, image_base64, image_format)
+            description, _ = await self._llm.generate_response_for_image(prompt, image_base64, image_format)
 
             cached_description = self._get_description_from_db(image_hash, "emoji")
             if cached_description:
