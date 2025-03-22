@@ -49,7 +49,7 @@ class ScheduleGenerator:
     ) -> Dict[str, str]:
         date_str = target_date.strftime("%Y-%m-%d")
         weekday = target_date.strftime("%A")
-
+        return "忘了", None
         schedule_text = str
 
         existing_schedule = db.schedule.find_one({"date": date_str})
