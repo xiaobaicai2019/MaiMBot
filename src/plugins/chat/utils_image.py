@@ -116,7 +116,7 @@ class ImageManager:
                 return f"[表情包：{cached_description}]"
 
             # 调用AI获取描述
-            prompt = "这是一个表情包，使用中文简洁的描述一下表情包的内容，表情包上的文字和表情包所表达的情感，可以使用二次元词汇"
+            prompt = "这是一个表情包，使用中文简洁的描述一下表情包的内容，表情包上的文字和表情包所表达的情感，可以使用二次元词汇，如果没有文字不需要说明\"没有文字\""
             description, _ = await self._llm.generate_response_for_image(prompt, image_base64, image_format)
 
             cached_description = self._get_description_from_db(image_hash, "emoji")
