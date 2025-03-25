@@ -152,7 +152,7 @@ class WillingManager:
 
         # 特殊情况处理
         if is_mentioned_bot:
-            current_willing += 0.5  
+            current_willing += 0.4  
             in_conversation_context = True
             self.chat_conversation_context[chat_id] = True
             logger.debug(f"被提及, 当前意愿: {current_willing}")
