@@ -196,7 +196,7 @@ class ChatBot:
             thinking_start_time = thinking_message.thinking_start_time
             message_set = MessageSet(chat, think_id)
             # 计算打字时间，1是为了模拟打字，2是避免多条回复乱序
-            # accu_typing_time = 0
+            accu_typing_time = 0
 
             mark_head = False
             for msg in response:
