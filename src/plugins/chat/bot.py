@@ -26,7 +26,7 @@ from .chat_stream import chat_manager
 from .message_sender import message_manager  # 导入新的消息管理器
 from .relationship_manager import relationship_manager
 from .storage import MessageStorage
-from .utils import is_mentioned_bot_in_message
+from .utils import is_mentioned_bot_in_message, calculate_typing_time
 from .utils_image import image_path_to_base64
 from .utils_user import get_user_nickname, get_user_cardname
 from ..willing.willing_manager import willing_manager  # 导入意愿管理器
@@ -202,10 +202,10 @@ class ChatBot:
             for msg in response:
                 # print(f"\033[1;32m[回复内容]\033[0m {msg}")
                 # 通过时间改变时间戳
-                # typing_time = calculate_typing_time(msg)
-                # logger.debug(f"typing_time: {typing_time}")
-                # accu_typing_time += typing_time
-                # timepoint = thinking_time_point + accu_typing_time
+                typing_time = calculate_typing_time(msg)
+                logger.debug(f"typing_time: {typing_time}")
+                accu_typing_time += typing_time
+                timepoint = thinking_time_point + accu_typing_time
                 message_segment = Seg(type="text", data=msg)
                 # logger.debug(f"message_segment: {message_segment}")
                 bot_message = MessageSending(
@@ -217,7 +217,7 @@ class ChatBot:
                     reply=message,
                     is_head=not mark_head,
                     is_emoji=False,
-                    thinking_start_time=thinking_start_time,
+                    thinking_start_time=timepoint,
                 )
                 if not mark_head:
                     mark_head = True
