@@ -213,8 +213,8 @@ async def monitor_time():
     await asyncio.sleep(10)
     while True:
         now = datetime.now().time()
-        # 定义允许时间段：12:00-13:00 和 20:00-23:45
-        if not ((dt_time(12, 0) <= now < dt_time(13, 0)) or (dt_time(20, 0) <= now < dt_time(23, 45))):
+        # 定义允许时间段：12:00-13:00 和 20:00-0:30（跨天）
+        if not ((dt_time(12, 0) <= now < dt_time(13, 0)) or (now >= dt_time(20, 0) or now < dt_time(0, 30))):
             logger.info("当前时间超出允许区间，自动关闭系统。")
             break
         await asyncio.sleep(60)
@@ -222,8 +222,8 @@ async def monitor_time():
 
 def allowed_time():
     now = datetime.now().time()
-    # 定义允许时间段：12:00-13:00 和 20:00-23:45
-    return ((dt_time(12, 0) <= now < dt_time(13, 0)) or (dt_time(20, 0) <= now < dt_time(23, 45)))
+    # 定义允许时间段：12:00-13:00 和 20:00-0:30（跨天）
+    return ((dt_time(12, 0) <= now < dt_time(13, 0)) or (now >= dt_time(20, 0) or now < dt_time(0, 30)))
 
 
 async def run_bot():
