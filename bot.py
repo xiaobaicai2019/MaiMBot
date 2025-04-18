@@ -9,6 +9,7 @@ import platform
 from dotenv import load_dotenv
 from src.common.logger import get_module_logger
 from src.main import MainSystem
+from datetime import datetime, time as dt_time
 
 logger = get_module_logger("main_bot")
 
@@ -207,29 +208,56 @@ def raw_main():
     return MainSystem()
 
 
+# 新增：自动关闭监控任务
+async def monitor_time():
+    await asyncio.sleep(10)
+    while True:
+        now = datetime.now().time()
+        # 定义允许时间段：12:00-13:00 和 20:00-23:45
+        if not ((dt_time(12, 0) <= now < dt_time(13, 0)) or (dt_time(20, 0) <= now < dt_time(23, 45))):
+            logger.info("当前时间超出允许区间，自动关闭系统。")
+            break
+        await asyncio.sleep(60)
+
+
+def allowed_time():
+    now = datetime.now().time()
+    # 定义允许时间段：12:00-13:00 和 20:00-23:45
+    return ((dt_time(12, 0) <= now < dt_time(13, 0)) or (dt_time(20, 0) <= now < dt_time(23, 45)))
+
+
+async def run_bot():
+    while True:
+        if allowed_time():
+            logger.info("当前时间处于允许区间，系统上线。")
+            try:
+                main_system = raw_main()
+                # 为每次上线创建新的事件循环环境（不用阻塞外层循环）
+                await main_system.initialize()
+
+                async def main_tasks():
+                    task1 = asyncio.create_task(main_system.schedule_tasks())
+                    task2 = asyncio.create_task(monitor_time())
+                    done, pending = await asyncio.wait(
+                        {task1, task2},
+                        return_when=asyncio.FIRST_COMPLETED,
+                    )
+                    for task in pending:
+                        task.cancel()
+                    await graceful_shutdown()
+
+                await main_tasks()
+
+            except Exception as e:
+                logger.error(f"主程序异常: {str(e)}")
+        else:
+            logger.info("当前时间不在允许区间，系统保持离线状态。")
+        # 每60秒检查一次
+        await asyncio.sleep(60)
+
+
 if __name__ == "__main__":
     try:
-        # 获取MainSystem实例
-        main_system = raw_main()
-
-        # 创建事件循环
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        try:
-            # 执行初始化和任务调度
-            loop.run_until_complete(main_system.initialize())
-            loop.run_until_complete(main_system.schedule_tasks())
-        except KeyboardInterrupt:
-            # loop.run_until_complete(global_api.stop())
-            logger.warning("收到中断信号，正在优雅关闭...")
-            loop.run_until_complete(graceful_shutdown())
-        finally:
-            loop.close()
-
-    except Exception as e:
-        logger.error(f"主程序异常: {str(e)}")
-        if loop and not loop.is_closed():
-            loop.run_until_complete(graceful_shutdown())
-            loop.close()
-        sys.exit(1)
+        asyncio.run(run_bot())
+    except KeyboardInterrupt:
+        logger.info("检测到 Ctrl+C，程序退出。")
