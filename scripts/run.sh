@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# MaiCore & Nonebot adapter一键安装脚本 by Cookie_987
+# MaiCore & NapCat Adapter一键安装脚本 by Cookie_987
 # 适用于Arch/Ubuntu 24.10/Debian 12/CentOS 9
 # 请小心使用任何一键脚本！
 
-INSTALLER_VERSION="0.0.1-refactor"
+INSTALLER_VERSION="0.0.3-refactor"
 LANG=C.UTF-8
 
 # 如无法访问GitHub请修改此处镜像地址
@@ -31,7 +31,7 @@ DEFAULT_INSTALL_DIR="/opt/maicore"
 # 服务名称
 SERVICE_NAME="maicore"
 SERVICE_NAME_WEB="maicore-web"
-SERVICE_NAME_NBADAPTER="maicore-nonebot-adapter"
+SERVICE_NAME_NBADAPTER="maibot-napcat-adapter"
 
 IS_INSTALL_MONGODB=false
 IS_INSTALL_NAPCAT=false
@@ -59,10 +59,10 @@ show_menu() {
             "1" "启动MaiCore" \
             "2" "停止MaiCore" \
             "3" "重启MaiCore" \
-            "4" "启动Nonebot adapter" \
-            "5" "停止Nonebot adapter" \
-            "6" "重启Nonebot adapter" \
-            "7" "更新MaiCore及其依赖" \
+            "4" "启动NapCat Adapter" \
+            "5" "停止NapCat Adapter" \
+            "6" "重启NapCat Adapter" \
+            "7" "拉取最新MaiCore仓库" \
             "8" "切换分支" \
             "9" "退出" 3>&1 1>&2 2>&3)
 
@@ -83,15 +83,15 @@ show_menu() {
                 ;;
             4)
                 systemctl start ${SERVICE_NAME_NBADAPTER}
-                whiptail --msgbox "✅Nonebot adapter已启动" 10 60
+                whiptail --msgbox "✅NapCat Adapter已启动" 10 60
                 ;;
             5)
                 systemctl stop ${SERVICE_NAME_NBADAPTER}
-                whiptail --msgbox "🛑Nonebot adapter已停止" 10 60
+                whiptail --msgbox "🛑NapCat Adapter已停止" 10 60
                 ;;
             6)
                 systemctl restart ${SERVICE_NAME_NBADAPTER}
-                whiptail --msgbox "🔄Nonebot adapter已重启" 10 60
+                whiptail --msgbox "🔄NapCat Adapter已重启" 10 60
                 ;;
             7)
                 update_dependencies
@@ -111,6 +111,8 @@ show_menu() {
 
 # 更新依赖
 update_dependencies() {
+    whiptail --title "⚠" --msgbox "更新后请阅读教程" 10 60
+    systemctl stop ${SERVICE_NAME}
     cd "${INSTALL_DIR}/MaiBot" || {
         whiptail --msgbox "🚫 无法进入安装目录！" 10 60
         return 1
@@ -126,8 +128,7 @@ update_dependencies() {
         return 1
     fi
     deactivate
-    systemctl restart ${SERVICE_NAME}
-    whiptail --msgbox "✅ 依赖已更新并重启服务！" 10 60
+    whiptail --msgbox "✅ 已停止服务并拉取最新仓库提交" 10 60
 }
 
 # 切换分支
@@ -157,7 +158,7 @@ switch_branch() {
         whiptail --msgbox "🚫 代码拉取失败！" 10 60
         return 1
     fi
-
+    systemctl stop ${SERVICE_NAME}
     source "${INSTALL_DIR}/venv/bin/activate"
     pip install -r requirements.txt
     deactivate
@@ -165,8 +166,7 @@ switch_branch() {
     sed -i "s/^BRANCH=.*/BRANCH=${new_branch}/" /etc/maicore_install.conf
     BRANCH="${new_branch}"
     check_eula
-    systemctl restart ${SERVICE_NAME}
-    whiptail --msgbox "✅ 已切换到分支 ${new_branch} 并重启服务！" 10 60
+    whiptail --msgbox "✅ 已停止服务并切换到分支 ${new_branch} ！" 10 60
 }
 
 check_eula() {
@@ -227,6 +227,8 @@ run_installation() {
             exit 1
         fi
     fi
+
+    whiptail --title "ℹ️ 提示" --msgbox "如果您没有特殊需求，请优先使用docker方式部署。" 10 60
 
     # 协议确认
     if ! (whiptail --title "ℹ️ [1/6] 使用协议" --yes-button "我同意" --no-button "我拒绝" --yesno "使用MaiCore及此脚本前请先阅读EULA协议及隐私协议\nhttps://github.com/MaiM-with-u/MaiBot/blob/refactor/EULA.md\nhttps://github.com/MaiM-with-u/MaiBot/blob/refactor/PRIVACY.md\n\n您是否同意上述协议？" 12 70); then
@@ -355,8 +357,8 @@ run_installation() {
     # Python版本检查
     check_python() {
         PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-        if ! python3 -c "import sys; exit(0) if sys.version_info >= (3,9) else exit(1)"; then
-            whiptail --title "⚠️ [4/6] Python 版本过低" --msgbox "检测到 Python 版本为 $PYTHON_VERSION，需要 3.9 或以上！\n请升级 Python 后重新运行本脚本。" 10 60
+        if ! python3 -c "import sys; exit(0) if sys.version_info >= (3,10) else exit(1)"; then
+            whiptail --title "⚠️ [4/6] Python 版本过低" --msgbox "检测到 Python 版本为 $PYTHON_VERSION，需要 3.10 或以上！\n请升级 Python 后重新运行本脚本。" 10 60
             exit 1
         fi
     }
@@ -370,12 +372,13 @@ run_installation() {
     # 选择分支
     choose_branch() {
     BRANCH=$(whiptail --title "🔀 选择分支" --radiolist "请选择要安装的分支：" 15 60 4 \
-        "main" "稳定最新版（推荐）" ON \
-        "classical" "经典版" OFF \
+        "main" "稳定版本（推荐）" ON \
+        "dev" "开发版（不知道什么意思就别选）" OFF \
+        "classical" "经典版（0.6.0以前的版本）" OFF \
         "custom" "自定义分支" OFF 3>&1 1>&2 2>&3)
     RETVAL=$?
     if [ $RETVAL -ne 0 ]; then
-        whiptail --msgbox "操作取消！" 10 60
+        whiptail --msgbox "🚫 操作取消！" 10 60
         exit 1
     fi
 
@@ -383,7 +386,7 @@ run_installation() {
         BRANCH=$(whiptail --title "🔀 自定义分支" --inputbox "请输入自定义分支名称：" 10 60 "refactor" 3>&1 1>&2 2>&3)
         RETVAL=$?
         if [ $RETVAL -ne 0 ]; then
-            whiptail --msgbox "输入取消！" 10 60
+            whiptail --msgbox "🚫 输入取消！" 10 60
             exit 1
         fi
         if [[ -z "$BRANCH" ]]; then
@@ -407,7 +410,7 @@ run_installation() {
     # 确认安装
     confirm_install() {
         local confirm_msg="请确认以下更改：\n\n"
-        confirm_msg+="📂 安装MaiCore、Nonebot Adapter到: $INSTALL_DIR\n"
+        confirm_msg+="📂 安装MaiCore、NapCat Adapter到: $INSTALL_DIR\n"
         confirm_msg+="🔀 分支: $BRANCH\n"
         [[ $IS_INSTALL_DEPENDENCIES == true ]] && confirm_msg+="📦 安装依赖：${missing_packages[@]}\n"
         [[ $IS_INSTALL_MONGODB == true || $IS_INSTALL_NAPCAT == true ]] && confirm_msg+="📦 安装额外组件：\n"
@@ -496,50 +499,28 @@ EOF
     }
 
     echo -e "${GREEN}克隆 nonebot-plugin-maibot-adapters 仓库...${RESET}"
-    git clone $GITHUB_REPO/MaiM-with-u/nonebot-plugin-maibot-adapters.git || {
-        echo -e "${RED}克隆 nonebot-plugin-maibot-adapters 仓库失败！${RESET}"
+    git clone $GITHUB_REPO/MaiM-with-u/MaiBot-Napcat-Adapter.git || {
+        echo -e "${RED}克隆 MaiBot-Napcat-Adapter.git 仓库失败！${RESET}"
         exit 1
     }
 
 
     echo -e "${GREEN}安装Python依赖...${RESET}"
     pip install -r MaiBot/requirements.txt
-    pip install nb-cli
-    pip install nonebot-adapter-onebot
-    pip install 'nonebot2[fastapi]'
+    cd MaiBot
+    pip install uv
+    uv pip install -i https://mirrors.aliyun.com/pypi/simple -r requirements.txt   
+    cd ..
 
     echo -e "${GREEN}安装maim_message依赖...${RESET}"
     cd maim_message
-    pip install -e .
+    uv pip install -i https://mirrors.aliyun.com/pypi/simple -e .
     cd ..
 
-    echo -e "${GREEN}部署Nonebot adapter...${RESET}"
-    cd MaiBot
-    mkdir nonebot-maibot-adapter
-    cd nonebot-maibot-adapter
-    cat > pyproject.toml <<EOF
-[project]
-name = "nonebot-maibot-adapter"
-version = "0.1.0"
-description = "nonebot-maibot-adapter"
-readme = "README.md"
-requires-python = ">=3.9, <4.0"
-
-[tool.nonebot]
-adapters = [
-    { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" }
-]
-plugins = []
-plugin_dirs = ["src/plugins"]
-builtin_plugins = []
-EOF
-
-    echo "Manually created by run.sh" > README.md
-    mkdir src
-    cp -r ../../nonebot-plugin-maibot-adapters/nonebot_plugin_maibot_adapters src/plugins/nonebot_plugin_maibot_adapters
+    echo -e "${GREEN}部署MaiBot Napcat Adapter...${RESET}"
+    cd MaiBot-Napcat-Adapter
+    uv pip install -i https://mirrors.aliyun.com/pypi/simple -r requirements.txt
     cd ..
-    cd ..
-
 
     echo -e "${GREEN}同意协议...${RESET}"
 
@@ -587,13 +568,13 @@ EOF
 
     cat > /etc/systemd/system/${SERVICE_NAME_NBADAPTER}.service <<EOF
 [Unit]
-Description=Maicore Nonebot adapter
-After=network.target mongod.service
+Description=MaiBot Napcat Adapter
+After=network.target mongod.service ${SERVICE_NAME}.service
 
 [Service]
 Type=simple
-WorkingDirectory=${INSTALL_DIR}/MaiBot/nonebot-maibot-adapter
-ExecStart=/bin/bash -c "source $INSTALL_DIR/venv/bin/activate && nb run --reload"
+WorkingDirectory=${INSTALL_DIR}/MaiBot-Napcat-Adapter
+ExecStart=$INSTALL_DIR/venv/bin/python3 main.py
 Restart=always
 RestartSec=10s
 
@@ -602,7 +583,6 @@ WantedBy=multi-user.target
 EOF
 
     systemctl daemon-reload
-    systemctl enable ${SERVICE_NAME}
 
     # 保存安装信息
     echo "INSTALLER_VERSION=${INSTALLER_VERSION}" > /etc/maicore_install.conf
