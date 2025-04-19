@@ -230,15 +230,18 @@ async def monitor_time():
 def allowed_time():
     now = datetime.now().time()
     weekday = datetime.now().weekday()  # 周一=0, ..., 周日=6
-    # 周六和周日全天在线
-    if weekday in [5, 6]:
-        return True
     # 定义允许时间区间配置，支持多个时间段
     allowed_intervals = [
         ((12, 0), (13, 0)),
         ((20, 0), (0, 30))
         # ...可以继续加入更多时间段...
     ]
+    # 周六和周日全天在线
+    if weekday in [5, 6]:
+        allowed_intervals = [
+            ((8, 0), (0, 30))
+        # ...可以继续加入更多时间段...
+        ]
     for start_tuple, end_tuple in allowed_intervals:
         start = dt_time(*start_tuple)
         end = dt_time(*end_tuple)
