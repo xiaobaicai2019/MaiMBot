@@ -105,14 +105,14 @@ def scan_provider(env_config: dict):
 
 async def graceful_shutdown():
     try:
-        logger.info("正在优雅关闭麦麦...")
+        logger.info("正在优雅关闭雪菜...")
         tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
 
     except Exception as e:
-        logger.error(f"麦麦关闭失败: {e}")
+        logger.error(f"雪菜关闭失败: {e}")
 
 
 def check_eula():

@@ -30,7 +30,7 @@ logger = get_module_logger("subheartflow", config=subheartflow_config)
 
 def init_prompt():
     prompt = ""
-    # prompt += f"麦麦的总体想法是：{self.main_heartflow_info}\n\n"
+    # prompt += f"雪菜的总体想法是：{self.main_heartflow_info}\n\n"
     prompt += "{extra_info}\n"
     # prompt += "{prompt_schedule}\n"
     prompt += "{relation_prompt_all}\n"
@@ -211,7 +211,7 @@ class SubHeartflow:
         )
 
         # prompt = ""
-        # # prompt += f"麦麦的总体想法是：{self.main_heartflow_info}\n\n"
+        # # prompt += f"雪菜的总体想法是：{self.main_heartflow_info}\n\n"
         # if tool_result.get("used_tools", False):
         #     prompt += f"{collected_info}\n"
         # prompt += f"{relation_prompt_all}\n"
@@ -249,11 +249,11 @@ class SubHeartflow:
         self.current_mind = response
 
         logger.info(f"prompt:\n{prompt}\n")
-        logger.info(f"麦麦的思考前脑内状态：{self.current_mind}")
+        logger.info(f"雪菜的思考前脑内状态：{self.current_mind}")
         return self.current_mind, self.past_mind
 
     async def do_thinking_after_reply(self, reply_content, chat_talking_prompt, extra_info):
-        # print("麦麦回复之后脑袋转起来了")
+        # print("雪菜回复之后脑袋转起来了")
 
         # 开始构建prompt
         prompt_personality = f"你的名字是{self.bot_name},你"
@@ -304,7 +304,7 @@ class SubHeartflow:
         self.update_current_mind(response)
 
         self.current_mind = response
-        logger.info(f"麦麦回复后的脑内状态：{self.current_mind}")
+        logger.info(f"雪菜回复后的脑内状态：{self.current_mind}")
 
         self.last_reply_time = time.time()
 
@@ -325,10 +325,10 @@ class SubHeartflow:
         random.shuffle(identity_detail)
         prompt_personality += f",{identity_detail[0]}"
 
-        # print("麦麦闹情绪了1")
+        # print("雪菜闹情绪了1")
         current_thinking_info = self.current_mind
         mood_info = self.current_state.mood
-        # print("麦麦闹情绪了2")
+        # print("雪菜闹情绪了2")
         prompt = ""
         prompt += f"{prompt_personality}\n"
         prompt += "现在你正在和qq群里的网友们聊天"
