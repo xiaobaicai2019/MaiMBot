@@ -13,6 +13,7 @@ from src.common.logger_manager import get_logger
 # from src.common.logger import LogConfig, CONFIRM_STYLE_CONFIG
 from src.common.crash_logger import install_crash_handler
 from src.main import MainSystem
+from datetime import datetime, time as dt_time
 
 
 logger = get_logger("main")
@@ -225,29 +226,75 @@ def raw_main():
     return MainSystem()
 
 
+# 修改后的 monitor_time 函数
+async def monitor_time():
+    await asyncio.sleep(10)
+    while True:
+        if not allowed_time():
+            logger.info("当前时间超出允许区间，自动关闭系统。")
+            break
+        await asyncio.sleep(60)
+
+
+# 修改后的 allowed_time 函数，支持多个时间段配置
+def allowed_time():
+    now = datetime.now().time()
+    weekday = datetime.now().weekday()  # 周一=0, ..., 周日=6
+    # 定义允许时间区间配置，支持多个时间段
+    allowed_intervals = [
+        ((11, 0), (13, 0)),
+        ((21, 0), (23, 45))
+        # ...可以继续加入更多时间段...
+    ]
+    # 周六和周日全天在线
+    if 1 or weekday in [5, 6]:
+        allowed_intervals = [
+            ((8, 0), (0, 30))
+        # ...可以继续加入更多时间段...
+        ]
+    for start_tuple, end_tuple in allowed_intervals:
+        start = dt_time(*start_tuple)
+        end = dt_time(*end_tuple)
+        if start < end:  # 不跨天
+            if start <= now < end:
+                return True
+        else:  # 跨天处理，如 20:00 - 0:30
+            if now >= start or now < end:
+                return True
+    return False
+
+
+async def run_bot():
+    while True:
+        if allowed_time():
+            logger.info("当前时间处于允许区间，系统上线。")
+            try:
+                main_system = raw_main()
+                # 为每次上线创建新的事件循环环境（不用阻塞外层循环）
+                await main_system.initialize()
+
+                async def main_tasks():
+                    task1 = asyncio.create_task(main_system.schedule_tasks())
+                    task2 = asyncio.create_task(monitor_time())
+                    done, pending = await asyncio.wait(
+                        {task1, task2},
+                        return_when=asyncio.FIRST_COMPLETED,
+                    )
+                    for task in pending:
+                        task.cancel()
+                    await graceful_shutdown()
+
+                await main_tasks()
+
+            except Exception as e:
+                logger.error(f"主程序异常: {str(e)} {str(traceback.format_exc())}")
+        else:
+            logger.info("当前时间不在允许区间，系统保持离线状态。")
+        # 每60秒检查一次
+        await asyncio.sleep(60)
+
+
 if __name__ == "__main__":
-    try:
-        # 获取MainSystem实例
-        main_system = raw_main()
-
-        # 创建事件循环
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        try:
-            # 执行初始化和任务调度
-            loop.run_until_complete(main_system.initialize())
-            loop.run_until_complete(main_system.schedule_tasks())
-        except KeyboardInterrupt:
-            # loop.run_until_complete(global_api.stop())
-            logger.warning("收到中断信号，正在优雅关闭...")
-            loop.run_until_complete(graceful_shutdown())
-        finally:
-            loop.close()
-
-    except Exception as e:
-        logger.error(f"主程序异常: {str(e)} {str(traceback.format_exc())}")
-        if loop and not loop.is_closed():
-            loop.run_until_complete(graceful_shutdown())
-            loop.close()
-        sys.exit(1)
+    try:        asyncio.run(run_bot())
+    except KeyboardInterrupt:
+        logger.info("检测到 Ctrl+C，程序退出。")
