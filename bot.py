@@ -6,18 +6,18 @@ import sys
 from pathlib import Path
 import time
 import platform
+import traceback
 from dotenv import load_dotenv
-from src.common.logger import get_module_logger, LogConfig, CONFIRM_STYLE_CONFIG
+from src.common.logger_manager import get_logger
+
+# from src.common.logger import LogConfig, CONFIRM_STYLE_CONFIG
 from src.common.crash_logger import install_crash_handler
 from src.main import MainSystem
 from datetime import datetime, time as dt_time
 
-logger = get_module_logger("main_bot")
-confirm_logger_config = LogConfig(
-    console_format=CONFIRM_STYLE_CONFIG["console_format"],
-    file_format=CONFIRM_STYLE_CONFIG["file_format"],
-)
-confirm_logger = get_module_logger("confirm", config=confirm_logger_config)
+
+logger = get_logger("main")
+confirm_logger = get_logger("confirm")
 # 获取没有加载env时的环境变量
 env_mask = {key: os.getenv(key) for key in os.environ}
 
@@ -52,6 +52,16 @@ def init_config():
 
         shutil.copy("template/bot_config_template.toml", "config/bot_config.toml")
         logger.info("复制完成，请修改config/bot_config.toml和.env中的配置后重新启动")
+    if not os.path.exists("config/lpmm_config.toml"):
+        logger.warning("检测到lpmm_config.toml不存在，正在从模板复制")
+
+        # 检查config目录是否存在
+        if not os.path.exists("config"):
+            os.makedirs("config")
+            logger.info("创建config目录")
+
+        shutil.copy("template/lpmm_config_template.toml", "config/lpmm_config.toml")
+        logger.info("复制完成，请修改config/lpmm_config.toml和.env中的配置后重新启动")
 
 
 def init_env():
@@ -277,7 +287,7 @@ async def run_bot():
                 await main_tasks()
 
             except Exception as e:
-                logger.error(f"主程序异常: {str(e)}")
+                logger.error(f"主程序异常: {str(e)} {str(traceback.format_exc())}")
         else:
             logger.info("当前时间不在允许区间，系统保持离线状态。")
         # 每60秒检查一次
@@ -285,7 +295,6 @@ async def run_bot():
 
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(run_bot())
+    try:        asyncio.run(run_bot())
     except KeyboardInterrupt:
         logger.info("检测到 Ctrl+C，程序退出。")
