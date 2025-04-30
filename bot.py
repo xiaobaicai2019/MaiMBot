@@ -105,14 +105,14 @@ def scan_provider(env_config: dict):
 
 async def graceful_shutdown():
     try:
-        logger.info("正在优雅关闭雪菜...")
+        logger.info("正在优雅关闭麦麦...")
         tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
 
     except Exception as e:
-        logger.error(f"雪菜关闭失败: {e}")
+        logger.error(f"麦麦关闭失败: {e}")
 
 
 def check_eula():
@@ -237,7 +237,7 @@ def allowed_time():
         # ...可以继续加入更多时间段...
     ]
     # 周六和周日全天在线
-    if weekday in [5, 6]:
+    if 1 or weekday in [5, 6]:
         allowed_intervals = [
             ((8, 0), (0, 30))
         # ...可以继续加入更多时间段...

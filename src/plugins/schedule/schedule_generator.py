@@ -284,8 +284,8 @@ async def main():
     # 使用示例
     scheduler = ScheduleGenerator()
     scheduler.initialize(
-        name="雪菜",
-        personality="你叫雪菜，你19岁，是一个大二的女大学生，你有一头黑色短发，你会刷贴吧，你现在在学习心理学",
+        name="麦麦",
+        personality="你叫麦麦，你19岁，是一个大二的女大学生，你有一头黑色短发，你会刷贴吧，你现在在学习心理学",
         behavior="你比较内向，一般熬夜比较晚，然后第二天早上10点起床吃早午饭",
         interval=60,
     )

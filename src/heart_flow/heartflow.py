@@ -109,7 +109,7 @@ class Heartflow:
         print("TODO")
 
     async def do_a_thinking(self):
-        logger.debug("雪菜大脑袋转起来了")
+        logger.debug("麦麦大脑袋转起来了")
         self.current_state.update_current_state_info()
 
         # 开始构建prompt
@@ -162,8 +162,8 @@ class Heartflow:
         self.update_current_mind(response)
 
         self.current_mind = response
-        logger.info(f"雪菜的总体脑内状态：{self.current_mind}")
-        # logger.info("雪菜想了想，当前活动:")
+        logger.info(f"麦麦的总体脑内状态：{self.current_mind}")
+        # logger.info("麦麦想了想，当前活动:")
         # await bot_schedule.move_doing(self.current_mind)
 
         for _, subheartflow in self._subheartflows.items():
