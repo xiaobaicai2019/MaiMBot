@@ -32,7 +32,7 @@ def init_prompt():
     Prompt("你正在和{sender_name}聊天，这是你们之前聊的内容：", "chat_target_private1")
     Prompt("和{sender_name}私聊", "chat_target_private2")
     Prompt(
-        """尽量少说"确实"和"可还行"。""",
+        "",
         "moderation_prompt",
     )
     Prompt(
@@ -50,7 +50,7 @@ def init_prompt():
         """
 你的名字叫{bot_name}，{prompt_identity}。
 {chat_target}，你希望在群里回复：{content}。现在请你根据以下信息修改回复内容。将这个回复修改的更加日常且口语化的回复，平淡一些，回复尽量简短一些。不要回复的太有条理。
-{prompt_ger}，不要刻意突出自身学科背景，注意只输出回复内容。
+{prompt_ger}，不要刻意突出自身学科背景，注意只输出回复内容,尽量少说"确实"和"可还行"。
 {moderation_prompt}。注意：不要输出多余内容(包括前后缀，冒号和引号，at或 @等 )。""",
         "heart_flow_prompt_response",
     )
