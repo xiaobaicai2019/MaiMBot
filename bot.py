@@ -236,10 +236,11 @@ def allowed_time():
         ((21, 0), (23, 45))
         # ...可以继续加入更多时间段...
     ]
-    # 周六和周日全天在线
-    if 1 or weekday in [5, 6]:
+    # 周六和周日长一点
+    if weekday in [5, 6]:
         allowed_intervals = [
-            ((8, 0), (0, 30))
+            ((10, 0), (2, 0)),
+            ((20, 0), (1, 30))
         # ...可以继续加入更多时间段...
         ]
     for start_tuple, end_tuple in allowed_intervals:
